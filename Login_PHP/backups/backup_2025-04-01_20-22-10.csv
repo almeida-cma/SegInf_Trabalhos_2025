@@ -1,0 +1,2 @@
+id,username,email,senha,autenticacao_habilitada,codigo_autenticacao,criado_em,perfil
+1,admin,admin@churros.com,$2y$10$5IhfQSNdczZBn3ZMkawIq.Pmt8/jLGo0oHNPz/deub5FUzzhSbZ5y,1,,"2025-04-01 15:20:04",admin
