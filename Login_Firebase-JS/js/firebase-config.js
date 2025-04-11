@@ -1,11 +1,11 @@
 // Configuração do Firebase (substitua com seus dados)
 const firebaseConfig = {
-  apiKey: "AIzaSyBocutEpzIj5wEjWBUDINoYxNkfQh65If4",
-  authDomain: "fir-95151.firebaseapp.com",
-  projectId: "fir-95151",
-  storageBucket: "fir-95151.firebasestorage.app",
-  messagingSenderId: "301817076013",
-  appId: "1:301817076013:web:23f9961f2b837cdd9f5ba4"
+  apiKey: "Sua apiKe",
+  authDomain: "Seu authDomain",
+  projectId: "Seu projectId",
+  storageBucket: "Seu storageBucket",
+  messagingSenderId: "Seu messagingSenderId",
+  appId: "Seu appId"
 };
 
 // Inicializa o Firebase
