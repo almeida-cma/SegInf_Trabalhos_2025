@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Falta de Proteção Anti-CSRF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #999;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Falta de Proteção Anti-CSRF</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Sem Tokens CSRF)</h2>
+        <p>Neste cenário, um site malicioso pode fazer requisições autenticadas em nome do usuário.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            
+            <p>1. Suponha que você está logado em um site bancário (simulado abaixo):</p>
+            <div class="form-group">
+                <label>Conta Bancária:</label>
+                <input type="text" id="bankAccount" value="12345-6" readonly>
+            </div>
+            <div class="form-group">
+                <label>Saldo:</label>
+                <input type="text" id="balance" value="R$ 5.000,00" readonly>
+            </div>
+            <button onclick="simulateLogin()">Simular Login</button>
+            
+            <p>2. Agora você visita um site malicioso que contém este iframe:</p>
+            <iframe srcdoc="
+                <html>
+                <body style='padding:10px;font-family:Arial'>
+                    <h3>Site Malicioso (simulação)</h3>
+                    <p>Este site contém um formulário oculto que tenta fazer uma transferência bancária sem seu conhecimento.</p>
+                    <form id='maliciousForm' action='javascript:void(0)' method='POST'>
+                        <input type='hidden' name='amount' value='5000'>
+                        <input type='hidden' name='toAccount' value='99999-9'>
+                    </form>
+                    <script>
+                        setTimeout(() => {
+                            document.getElementById('maliciousForm').submit();
+                            parent.document.getElementById('csrfResult').innerHTML = 
+                                '&lt;p style=&quot;color:red;&quot;&gt;Ataque CSRF simulado: Requisição de transferência de R$ 5000 enviada!&lt;/p&gt;';
+                        }, 2000);
+                    </script>
+                </body>
+                </html>
+            "></iframe>
+            
+            <div id="csrfResult"></div>
+            
+            <p>Se o site bancário não tiver proteção CSRF, essa transferência seria realizada sem sua confirmação!</p>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Com Tokens CSRF)</h2>
+        <p>Com tokens CSRF, requisições não podem ser feitas sem o token válido.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            
+            <p><strong>Backend (exemplo Node.js/Express com csrf middleware):</strong></p>
+            <pre>
+// Gerar token CSRF
+app.use(csrf({ cookie: true }));
+
+// Rota para formulário - incluir token
+app.get('/form', (req, res) => {
+    res.render('form', { csrfToken: req.csrfToken() });
+});
+
+// Validar token em requisições POST
+app.post('/transfer', (req, res) => {
+    // O middleware csrf já valida automaticamente
+    // Processar transferência se token válido
+});</pre>
+
+            <p><strong>Frontend (incluir token no formulário):</strong></p>
+            <pre>
+&lt;form action="/transfer" method="POST"&gt;
+    &lt;input type="hidden" name="_csrf" value="&lt;%= csrfToken %&gt;"&gt;
+    &lt;!-- outros campos do formulário --&gt;
+&lt;/form&gt;</pre>
+            
+            <p>Resultado: O site malicioso não pode gerar requisições válidas sem conhecer o token CSRF.</p>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> Ataques CSRF permitem que um site malicioso faça requisições autenticadas em nome do usuário, aproveitando que os cookies de sessão são enviados automaticamente.</p>
+        <p><strong>Solução:</strong> Tokens CSRF são valores únicos e secretos que devem ser incluídos em cada requisição que altera estado no servidor.</p>
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Desenvolvedor:</strong> Implementar geração e validação de tokens CSRF no backend e incluí-los nos formulários</li>
+            <li><strong>Servidor:</strong> Não tem controle direto sobre essa proteção</li>
+        </ul>
+    </div>
+
+    <script>
+        function simulateLogin() {
+            document.getElementById('csrfResult').innerHTML = 
+                "<p>Login simulado - cookies de sessão definidos. Agora você está 'autenticado'.</p>";
+        }
+    </script>
+</body>
+</html>

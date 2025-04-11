@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Vazamento em Cabeçalhos HTTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        .headers {
+            background-color: #eee;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Vazamento de Informações nos Cabeçalhos HTTP</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Cabeçalhos Reveladores)</h2>
+        <p>Neste cenário, os cabeçalhos HTTP revelam detalhes sobre a tecnologia do servidor.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            <button onclick="fetchVulnerableHeaders()">Buscar Cabeçalhos Vulneráveis</button>
+            <div id="vulnerableHeaders"></div>
+            
+            <p>Problemas demonstrados:</p>
+            <ul>
+                <li>Revelação da versão exata do servidor web (ex: Apache 2.4.29)</li>
+                <li>Exposição da versão do PHP/Node.js/outras tecnologias</li>
+                <li>Informação sobre módulos e extensões habilitadas</li>
+                <li>Facilita ataques direcionados a vulnerabilidades específicas</li>
+            </ul>
+            
+            <h4>Exemplo de cabeçalhos reveladores:</h4>
+            <div class="headers">
+Server: Apache/2.4.29 (Ubuntu)
+X-Powered-By: PHP/7.2.24-0ubuntu0.18.04.6
+X-AspNetMvc-Version: 5.2
+X-AspNet-Version: 4.0.30319
+            </div>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Cabeçalhos Ocultos)</h2>
+        <p>Removendo ou modificando cabeçalhos que revelam informações sensíveis.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            
+            <table>
+                <tr>
+                    <th>Cabeçalho</th>
+                    <th>Problema</th>
+                    <th>Solução</th>
+                </tr>
+                <tr>
+                    <td>Server</td>
+                    <td>Revela servidor e versão</td>
+                    <td>Apache: ServerTokens Prod<br>Nginx: server_tokens off</td>
+                </tr>
+                <tr>
+                    <td>X-Powered-By</td>
+                    <td>Revela tecnologia backend</td>
+                    <td>Remover via configuração ou código</td>
+                </tr>
+                <tr>
+                    <td>X-AspNet*</td>
+                    <td>Revela versão do ASP.NET</td>
+                    <td>Desabilitar no web.config</td>
+                </tr>
+            </table>
+            
+            <p><strong>Configurações específicas:</strong></p>
+            
+            <p>Apache:</p>
+            <pre>
+# Ocultar versão do servidor
+ServerTokens Prod
+
+# Remover cabeçalhos
+Header unset X-Powered-By
+Header unset Server</pre>
+            
+            <p>Nginx:</p>
+            <pre>
+# Ocultar versão
+server_tokens off;
+
+# Remover cabeçalhos
+more_clear_headers 'X-Powered-By';</pre>
+            
+            <p>Node.js (Express):</p>
+            <pre>
+// Desabilitar X-Powered-By
+app.disable('x-powered-by');</pre>
+            
+            <p>PHP:</p>
+            <pre>
+// Remover X-Powered-By
+header_remove('X-Powered-By');</pre>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> Cabeçalhos HTTP podem revelar informações sobre a stack tecnológica, permitindo que atacantes busquem vulnerabilidades específicas para essas versões.</p>
+        <p><strong>Solução:</strong> Configurar servidores e aplicações para não revelar informações desnecessárias nos cabeçalhos.</p>
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Servidor:</strong> Configurar o servidor web para remover/modificar cabeçalhos sensíveis</li>
+            <li><strong>Desenvolvedor:</strong> Configurar frameworks/APIs para não expor informações desnecessárias</li>
+        </ul>
+    </div>
+
+    <script>
+        async function fetchVulnerableHeaders() {
+            try {
+                // Simular cabeçalhos de um servidor vulnerável
+                const vulnerableHeaders = {
+                    'Server': 'Apache/2.4.29 (Ubuntu)',
+                    'X-Powered-By': 'PHP/7.2.24-0ubuntu0.18.04.6',
+                    'X-AspNetMvc-Version': '5.2',
+                    'Content-Type': 'text/html; charset=UTF-8'
+                };
+                
+                let headersText = 'Cabeçalhos HTTP (simulados):\n';
+                for (const [key, value] of Object.entries(vulnerableHeaders)) {
+                    headersText += `${key}: ${value}\n`;
+                }
+                
+                document.getElementById('vulnerableHeaders').innerHTML = 
+                    `<div class="headers">${headersText}</div>
+                     <p>Com essas informações, um atacante pode buscar vulnerabilidades conhecidas para:</p>
+                     <ul>
+                         <li>Apache 2.4.29</li>
+                         <li>PHP 7.2.24</li>
+                         <li>ASP.NET MVC 5.2</li>
+                     </ul>`;
+            } catch (error) {
+                document.getElementById('vulnerableHeaders').innerHTML = 
+                    `<p>Erro ao buscar cabeçalhos: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

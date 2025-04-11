@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Cabeçalhos que Revelam Tecnologia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        .headers {
+            background-color: #eee;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre;
+        }
+        .simulated-server {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Cabeçalhos HTTP que Revelam Tecnologia</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Cabeçalhos Reveladores)</h2>
+        <p>Neste cenário, os cabeçalhos HTTP revelam informações sobre a tecnologia do servidor.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            
+            <div class="simulated-server">
+                <p>// Simulação de resposta de servidor vulnerável</p>
+                <p>HTTP/1.1 200 OK</p>
+                <p>Server: Apache/2.4.29 (Ubuntu)</p>
+                <p>X-Powered-By: PHP/7.2.24-0ubuntu0.18.04.6</p>
+                <p>Content-Type: text/html; charset=UTF-8</p>
+            </div>
+            
+            <button onclick="simulateHeaders()">Mostrar Análise de Vulnerabilidade</button>
+            <div id="headersAnalysis"></div>
+            
+            <p>Problemas demonstrados:</p>
+            <ul>
+                <li>Ataques direcionados: hackers podem explorar vulnerabilidades conhecidas da versão específica</li>
+                <li>Reconhecimento de tecnologia facilita ataques automatizados</li>
+                <li>Informações desnecessárias expostas</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Cabeçalhos Ocultos)</h2>
+        <p>Removendo ou modificando cabeçalhos que revelam informações sensíveis.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            
+            <div class="simulated-server">
+                <p>// Simulação de resposta de servidor seguro</p>
+                <p>HTTP/1.1 200 OK</p>
+                <p>Server: Apache</p>
+                <p>Content-Type: text/html; charset=UTF-8</p>
+            </div>
+            
+            <p><strong>Apache:</strong></p>
+            <pre>
+# Remover cabeçalho Server
+ServerTokens Prod
+# Remover X-Powered-By
+Header unset X-Powered-By</pre>
+
+            <p><strong>Nginx:</strong></p>
+            <pre>
+# Ocultar versão do servidor
+server_tokens off;
+# Remover cabeçalhos
+more_clear_headers 'X-Powered-By';</pre>
+
+            <p><strong>Node.js (Express):</strong></p>
+            <pre>
+// Desabilitar cabeçalho X-Powered-By
+app.disable('x-powered-by');</pre>
+
+            <p><strong>PHP:</strong></p>
+            <pre>
+// Remover X-Powered-By
+header_remove('X-Powered-By');</pre>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> Cabeçalhos como X-Powered-By e Server revelam a tecnologia e versão do servidor, facilitando ataques direcionados.</p>
+        <p><strong>Solução:</strong> Remover ou modificar esses cabeçalhos para não revelar informações sensíveis.</p>
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Servidor:</strong> Configurar o servidor web para remover/modificar cabeçalhos</li>
+            <li><strong>Desenvolvedor:</strong> Configurar frameworks/APIs para não expor informações desnecessárias</li>
+        </ul>
+    </div>
+
+    <script>
+        function simulateHeaders() {
+            const vulnerableHeaders = {
+                'Server': 'Apache/2.4.29 (Ubuntu)',
+                'X-Powered-By': 'PHP/7.2.24-0ubuntu0.18.04.6',
+                'Content-Type': 'text/html; charset=UTF-8'
+            };
+            
+            let analysis = "<h4>Análise de Segurança:</h4>";
+            analysis += "<p>Os cabeçalhos revelam:</p>";
+            analysis += "<ul>";
+            
+            if (vulnerableHeaders['Server'].includes('/')) {
+                analysis += `<li><strong>Servidor vulnerável:</strong> ${vulnerableHeaders['Server']} - Um atacante pode buscar exploits específicos para esta versão</li>`;
+            }
+            
+            if (vulnerableHeaders['X-Powered-By']) {
+                analysis += `<li><strong>Tecnologia backend:</strong> ${vulnerableHeaders['X-Powered-By']} - Revela a linguagem e versão usadas no servidor</li>`;
+            }
+            
+            analysis += "</ul>";
+            analysis += "<p>Com essas informações, um atacante pode:</p>";
+            analysis += "<ol>";
+            analysis += "<li>Buscar vulnerabilidades conhecidas para essas versões específicas</li>";
+            analysis += "<li>Desenvolver ataques direcionados à sua stack tecnológica</li>";
+            analysis += "<li>Identificar possíveis vetores de ataque baseados nas tecnologias usadas</li>";
+            analysis += "</ol>";
+            
+            document.getElementById('headersAnalysis').innerHTML = analysis;
+        }
+    </script>
+</body>
+</html>

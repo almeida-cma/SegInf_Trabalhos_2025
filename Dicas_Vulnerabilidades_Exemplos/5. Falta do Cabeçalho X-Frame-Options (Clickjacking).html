@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Falta do X-Frame-Options</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #999;
+            margin: 10px 0;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+        .frame-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Falta do Cabeçalho X-Frame-Options</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Sem X-Frame-Options)</h2>
+        <p>Neste cenário, seu site pode ser incorporado em um iframe por outros sites, permitindo ataques de clickjacking.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            
+            <p>Este é um site malicioso que incorpora seu site em um iframe transparente:</p>
+            
+            <div class="frame-container">
+                <iframe srcdoc="
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Site Real (simulado)</title>
+                        <style>
+                            body { font-family: Arial; padding: 20px; }
+                            button { padding: 10px; background: #4CAF50; color: white; border: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Site Real (simulado)</h2>
+                        <p>Você está logado como: usuario@exemplo.com</p>
+                        <button onclick='alert(&quot;Ação realizada com sucesso!&quot;)'>Excluir Conta</button>
+                        <p>Em um site real, este botão executaria ações sensíveis.</p>
+                    </body>
+                    </html>
+                "></iframe>
+                <div class="overlay">CLIQUE AQUI PARA GANHAR UM PRÊMIO!</div>
+            </div>
+            
+            <p>O ataque de clickjacking funciona assim:</p>
+            <ol>
+                <li>O site malicioso coloca seu site em um iframe transparente</li>
+                <li>Ele sobrepõe elementos atraentes (como "Ganhe um prêmio")</li>
+                <li>Quando o usuário clica, na verdade está clicando em elementos do seu site</li>
+                <li>Isso pode levar a ações não intencionais (como excluir a conta)</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Com X-Frame-Options)</h2>
+        <p>Com X-Frame-Options, você controla se e como seu site pode ser incorporado em iframes.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            
+            <p><strong>Via cabeçalho HTTP (recomendado):</strong></p>
+            <pre>X-Frame-Options: DENY</pre>
+            <p>Ou para permitir apenas do mesmo domínio:</p>
+            <pre>X-Frame-Options: SAMEORIGIN</pre>
+            
+            <p><strong>Configuração no servidor:</strong></p>
+            <p>Apache:</p>
+            <pre>Header always set X-Frame-Options "DENY"</pre>
+            
+            <p>Nginx:</p>
+            <pre>add_header X-Frame-Options "DENY";</pre>
+            
+            <p><strong>Alternativa moderna (CSP):</strong></p>
+            <pre>Content-Security-Policy: frame-ancestors 'none'</pre>
+            
+            <p>Resultado: Seu site não pode ser incorporado em iframes por outros domínios.</p>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> Clickjacking é um ataque onde um site malicioso engana o usuário para clicar em elementos de outro site incorporado em um iframe transparente.</p>
+        <p><strong>Solução:</strong> O cabeçalho X-Frame-Options permite controlar se o site pode ser incorporado em iframes.</p>
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Servidor:</strong> Configurar o cabeçalho X-Frame-Options nas respostas HTTP</li>
+            <li><strong>Desenvolvedor:</strong> Pode definir o cabeçalho em frameworks ou usar CSP</li>
+        </ul>
+    </div>
+</body>
+</html>

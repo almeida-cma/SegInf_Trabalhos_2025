@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Cookies Inseguros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Cookies sem HttpOnly, Secure e SameSite</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Cookies Inseguros)</h2>
+        <p>Neste cenário, os cookies podem ser acessados via JavaScript e transmitidos por conexões não seguras.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            <button onclick="setInsecureCookie()">Criar Cookie Inseguro</button>
+            <button onclick="showCookies()">Mostrar Cookies</button>
+            <button onclick="simulateXSSAttack()">Simular Ataque XSS</button>
+            
+            <div id="cookieDisplay"></div>
+            <div id="xssAttackResult"></div>
+            
+            <p>Problemas demonstrados:</p>
+            <ul>
+                <li>Cookie acessível via JavaScript (roubo possível por XSS)</li>
+                <li>Cookie enviado em conexões HTTP (não apenas HTTPS)</li>
+                <li>Cookie enviado em requisições cross-site (CSRF)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Cookies Protegidos)</h2>
+        <p>Com os atributos corretos, os cookies ficam protegidos contra vários tipos de ataques.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            <p>No servidor (exemplo em Node.js/Express):</p>
+            <pre>
+res.cookie('sessionID', '12345', {
+    httpOnly: true,     // Impede acesso via JavaScript
+    secure: true,       // Só envia em HTTPS
+    sameSite: 'strict', // Previne CSRF
+    maxAge: 3600000    // Tempo de vida
+});</pre>
+
+            <p>Ou via cabeçalho HTTP (exemplo PHP):</p>
+            <pre>
+Set-Cookie: sessionID=12345; HttpOnly; Secure; SameSite=Strict; Max-Age=3600</pre>
+            
+            <table>
+                <tr>
+                    <th>Atributo</th>
+                    <th>Proteção</th>
+                </tr>
+                <tr>
+                    <td>HttpOnly</td>
+                    <td>Impede acesso via JavaScript (protege contra XSS)</td>
+                </tr>
+                <tr>
+                    <td>Secure</td>
+                    <td>Só envia o cookie em conexões HTTPS</td>
+                </tr>
+                <tr>
+                    <td>SameSite</td>
+                    <td>Controla quando o cookie é enviado em requisições cross-site (protege contra CSRF)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> Cookies sem proteção podem ser roubados via XSS ou usados em ataques CSRF.</p>
+        <p><strong>Solução:</strong> Definir os atributos HttpOnly, Secure e SameSite nos cookies.</p>
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Desenvolvedor:</strong> Configurar cookies corretamente no código</li>
+            <li><strong>Servidor:</strong> Pode reforçar políticas via configuração global</li>
+        </ul>
+    </div>
+
+    <script>
+        function setInsecureCookie() {
+            document.cookie = "insecureSession=abc123; path=/";
+            document.getElementById('cookieDisplay').innerHTML = 
+                "<p>Cookie inseguro criado: insecureSession=abc123</p>";
+        }
+        
+        function showCookies() {
+            document.getElementById('cookieDisplay').innerHTML = 
+                `<p>Cookies atuais: <strong>${document.cookie || 'Nenhum cookie'}</strong></p>`;
+        }
+        
+        function simulateXSSAttack() {
+            // Simula um ataque XSS que rouba cookies
+            const stolenCookies = document.cookie;
+            document.getElementById('xssAttackResult').innerHTML = 
+                `<p style="color:red;">[SIMULAÇÃO] Ataque XSS roubou os cookies: ${stolenCookies}</p>
+                 <p>Em um ataque real, esses cookies seriam enviados para um servidor malicioso.</p>`;
+        }
+    </script>
+</body>
+</html>

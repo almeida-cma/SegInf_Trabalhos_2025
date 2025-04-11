@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulação: Falta de Sanitização de Entradas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-area {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .vulnerable {
+            background-color: #ffdddd;
+            border-left: 5px solid #f44336;
+            padding: 10px;
+        }
+        .secure {
+            background-color: #ddffdd;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .attack-result {
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #ffeeee;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulação: Falta de Sanitização de Entradas</h1>
+    
+    <div class="vulnerable">
+        <h2>❌ Cenário Vulnerável (Sem Sanitização)</h2>
+        <p>Neste cenário, entradas do usuário são usadas sem validação ou sanitização, permitindo vários tipos de ataques.</p>
+        
+        <div class="demo-area">
+            <h3>Demonstração:</h3>
+            
+            <div class="form-group">
+                <label for="searchTerm">Buscar Produto (XSS):</label>
+                <input type="text" id="searchTerm" placeholder="Digite um termo de busca">
+                <button onclick="searchProducts()">Buscar</button>
+                <div id="searchResults"></div>
+                
+                <p>Tente inserir: <code>&lt;img src="x" onerror="alert('XSS!')"&gt;</code></p>
+            </div>
+            
+            <div class="form-group">
+                <label for="userId">Buscar Usuário (SQL Injection):</label>
+                <input type="text" id="userId" placeholder="ID do usuário">
+                <button onclick="getUser()">Buscar</button>
+                <div id="userResult"></div>
+                
+                <p>Tente inserir: <code>1 OR 1=1; --</code></p>
+            </div>
+            
+            <div id="attackResults"></div>
+        </div>
+    </div>
+    
+    <div class="secure">
+        <h2>✅ Cenário Seguro (Com Sanitização)</h2>
+        <p>Validando, filtrando e escapando todas as entradas do usuário.</p>
+        
+        <div class="demo-area">
+            <h3>Como implementar:</h3>
+            
+            <h4>Proteção contra XSS:</h4>
+            <p><strong>Frontend (escapar conteúdo):</strong></p>
+            <pre>
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Ao exibir conteúdo do usuário
+element.innerHTML = escapeHtml(userInput);</pre>
+            
+            <p><strong>Backend (Node.js):</strong></p>
+            <pre>
+const escape = require('escape-html');
+
+// Ao enviar dados para o frontend
+res.render('template', { userInput: escape(userInput) });</pre>
+            
+            <h4>Proteção contra SQL Injection:</h4>
+            <p><strong>Usando prepared statements (Node.js):</strong></p>
+            <pre>
+// UNSAFE (vulnerável a SQL injection)
+db.query(`SELECT * FROM users WHERE id = ${userId}`);
+
+// SAFE (usando prepared statements)
+db.query('SELECT * FROM users WHERE id = ?', [userId]);</pre>
+            
+            <p><strong>ORM (exemplo Sequelize):</strong></p>
+            <pre>
+User.findOne({ where: { id: userId } }); // Automáticamente seguro</pre>
+            
+            <h4>Validação de Entrada:</h4>
+            <pre>
+// Exemplo: Validar email
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Exemplo: Validar ID numérico
+function isValidId(id) {
+    return /^\d+$/.test(id);
+}</pre>
+        </div>
+    </div>
+    
+    <div class="explanation">
+        <h2>📚 Explicação</h2>
+        <p><strong>Problema:</strong> A falta de sanitização permite ataques como:</p>
+        <ul>
+            <li><strong>XSS (Cross-Site Scripting):</strong> Injeção de código JavaScript malicioso</li>
+            <li><strong>SQL Injection:</strong> Injeção de comandos SQL para manipular o banco de dados</li>
+            <li><strong>Command Injection:</strong> Execução de comandos no sistema operacional</li>
+        </ul>
+        
+        <p><strong>Solução:</strong></p>
+        <ul>
+            <li><strong>Validar:</strong> Verificar se a entrada está no formato esperado</li>
+            <li><strong>Escape:</strong> Tratar caracteres especiais antes de usar em HTML/SQL</li>
+            <li><strong>Prepared Statements:</strong> Usar para todas as consultas SQL</li>
+            <li><strong>Bibliotecas seguras:</strong> Usar ORMs e templates engines que fazem escape automático</li>
+        </ul>
+        
+        <p><strong>Responsabilidade:</strong></p>
+        <ul>
+            <li><strong>Desenvolvedor:</strong> Implementar sanitização em todas as entradas do usuário</li>
+            <li><strong>Servidor:</strong> Não tem como proteger diretamente contra isso</li>
+        </ul>
+    </div>
+
+    <script>
+        function searchProducts() {
+            const term = document.getElementById('searchTerm').value;
+            // Simulação de XSS - inserindo conteúdo não sanitizado no DOM
+            document.getElementById('searchResults').innerHTML = 
+                `<h4>Resultados para: ${term}</h4>
+                 <p>Produtos encontrados: 5</p>`;
+            
+            if (term.includes('<script>') || term.includes('onerror')) {
+                document.getElementById('attackResults').innerHTML = 
+                    `<div class="attack-result">
+                     <p>⚠️ XSS DETECTADO! O código malicioso foi executado porque a entrada não foi sanitizada.</p>
+                     <p>Em um ataque real, isso poderia roubar cookies, redirecionar para sites maliciosos, etc.</p>
+                     </div>`;
+            }
+        }
+        
+        function getUser() {
+            const userId = document.getElementById('userId').value;
+            // Simulação de SQL Injection
+            if (userId.includes('OR 1=1') || userId.includes('--')) {
+                document.getElementById('userResult').innerHTML = 
+                    `<p>Usuários encontrados: TODOS (vazamento de dados!)</p>`;
+                document.getElementById('attackResults').innerHTML = 
+                    `<div class="attack-result">
+                     <p>⚠️ SQL INJECTION DETECTADO! A consulta foi manipulada para retornar todos os usuários.</p>
+                     <p>Em um ataque real, isso poderia vazar dados sensíveis ou até excluir o banco de dados.</p>
+                     </div>`;
+            } else {
+                document.getElementById('userResult').innerHTML = 
+                    `<p>Usuário encontrado: ID ${userId}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
